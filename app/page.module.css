@@ -138,7 +138,7 @@
   }
 
   .textOverlay {
-    bottom: 20%;
+    bottom: 28%;
     padding: 1.5rem;
   }
 
@@ -184,7 +184,7 @@
   }
 
   .textOverlay {
-    bottom: 18%;
+    bottom: 25%;
     padding: 1rem;
   }
 
@@ -258,6 +258,7 @@
   }
 
   .textOverlay {
+    bottom: 25% !important;
     width: 98% !important;
     padding: 0.5rem 0.2rem !important;
     max-width: 100% !important;
@@ -278,6 +279,7 @@
 
 @media (max-width: 320px) {
   .textOverlay {
+    bottom: 25% !important;
     width: 98% !important;
     padding: 0.4rem 0.2rem !important;
     max-width: 100% !important;
