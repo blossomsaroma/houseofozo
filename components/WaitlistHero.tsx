@@ -26,6 +26,17 @@ export function WaitlistHero() {
 
   return (
     <main className={styles.hero}>
+      <video
+        className={styles.bgVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        aria-hidden
+      >
+        <source src="/backgroundVideo.mp4" type="video/mp4" />
+      </video>
+
       <svg
         className={styles.gooFilterSvg}
         xmlns="http://www.w3.org/2000/svg"
@@ -64,7 +75,9 @@ export function WaitlistHero() {
 
         <div className={styles.inner}>
           <p className={styles.introLead}>
-            Those inside the house, get more than just a scent.
+            Those inside the house,
+            <br />
+            get more than just a scent.
           </p>
 
           <form className={styles.form} onSubmit={handleSubmit}>
@@ -105,7 +118,7 @@ export function WaitlistHero() {
               autoComplete="email"
             />
             <button type="submit" className={styles.submit}>
-              <span className={styles.submitLabel}>Get early access</span>
+              <span className={styles.submitLabel}>RESERVE MY PLACE</span>
               <span className={styles.submitBlobs} aria-hidden>
                 <span className={styles.submitBlob} />
                 <span className={styles.submitBlob} />
@@ -116,9 +129,11 @@ export function WaitlistHero() {
 
           <div className={styles.footer}>
             <p className={styles.footerMain}>
-              The first perk of being early? Our debut drop, yours before anyone
-              else.
+              The first perk of being early?
+              <br />
+              Our debut drop, yours before anyone else.
             </p>
+            <p>Crafted slowly | Released in limited drops</p>
           </div>
         </div>
       </div>
