@@ -63,8 +63,9 @@ export function WaitlistHero() {
         </p>
 
         <div className={styles.inner}>
-          <p className={styles.introLead}>The first scents are almost ready.</p>
-          <p className={styles.introFollow}>Be the first to know</p>
+          <p className={styles.introLead}>
+            Those inside the house, get more than just a scent.
+          </p>
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <label htmlFor="waitlist-name" className="sr-only">
@@ -113,15 +114,11 @@ export function WaitlistHero() {
             </button>
           </form>
 
-          <a className={styles.innerCircle} href="#inner-circle">
-            Join the inner circle
-          </a>
-
           <div className={styles.footer}>
-            <p>Crafted slowly.</p>
-            <p className={styles.footerEm}>Released in limited drops.</p>
-            <p className={styles.footerEm}>Early access to our first drop.</p>
-            <p>The first to experience House of Ozo.</p>
+            <p className={styles.footerMain}>
+              The first perk of being early? Our debut drop, yours before anyone
+              else.
+            </p>
           </div>
         </div>
       </div>
