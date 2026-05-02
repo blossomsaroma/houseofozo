@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import styles from './WaitlistHero.module.css'
 
 const INSTAGRAM_URL =
@@ -23,6 +24,18 @@ export function WaitlistHero() {
     e.preventDefault()
     e.currentTarget.reset()
   }
+
+  useEffect(() => {
+    const preventScroll = (e: Event) => {
+      e.preventDefault()
+    }
+    window.addEventListener('wheel', preventScroll, { passive: false })
+    window.addEventListener('touchmove', preventScroll, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', preventScroll)
+      window.removeEventListener('touchmove', preventScroll)
+    }
+  }, [])
 
   return (
     <main className={styles.hero}>
