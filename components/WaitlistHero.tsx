@@ -1,10 +1,48 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './WaitlistHero.module.css'
 
 const INSTAGRAM_URL =
   'https://www.instagram.com/houseofozo.in?igsh=djI3N3hiajlwNDN5'
+
+const WAITLIST_DRAFT_KEY = 'houseofozo:waitlist-draft'
+
+type WaitlistDraft = {
+  name: string
+  phone: string
+  email: string
+}
+
+const emptyDraft: WaitlistDraft = { name: '', phone: '', email: '' }
+
+function readDraftFromStorage(): WaitlistDraft {
+  if (typeof window === 'undefined') return emptyDraft
+  try {
+    const raw = localStorage.getItem(WAITLIST_DRAFT_KEY)
+    if (!raw) return emptyDraft
+    const p = JSON.parse(raw) as Record<string, unknown>
+    return {
+      name: typeof p.name === 'string' ? p.name : '',
+      phone: typeof p.phone === 'string' ? p.phone : '',
+      email: typeof p.email === 'string' ? p.email : '',
+    }
+  } catch {
+    return emptyDraft
+  }
+}
+
+function writeDraftToStorage(draft: WaitlistDraft) {
+  try {
+    if (!draft.name && !draft.phone && !draft.email) {
+      localStorage.removeItem(WAITLIST_DRAFT_KEY)
+    } else {
+      localStorage.setItem(WAITLIST_DRAFT_KEY, JSON.stringify(draft))
+    }
+  } catch {
+    // ignore quota / private mode
+  }
+}
 
 function InstagramIcon() {
   return (
@@ -20,10 +58,70 @@ function InstagramIcon() {
 }
 
 export function WaitlistHero() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    e.currentTarget.reset()
+  const [draft, setDraft] = useState<WaitlistDraft>(emptyDraft)
+  const draftRef = useRef(draft)
+  draftRef.current = draft
+
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle')
+  const [statusMessage, setStatusMessage] = useState('')
+
+  const persistDraft = (next: WaitlistDraft) => {
+    setDraft(next)
+    writeDraftToStorage(next)
   }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const name = draft.name.trim()
+    const phone = draft.phone.trim()
+    const email = draft.email.trim()
+
+    setStatus('loading')
+    setStatusMessage('')
+
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, email }),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string
+      }
+
+      if (!res.ok) {
+        setStatus('error')
+        setStatusMessage(data.error || 'Something went wrong. Try again.')
+        return
+      }
+
+      setStatus('success')
+      setStatusMessage("You're on the list.")
+      persistDraft(emptyDraft)
+    } catch {
+      setStatus('error')
+      setStatusMessage('Network error. Try again.')
+    }
+  }
+
+  useEffect(() => {
+    setDraft(readDraftFromStorage())
+  }, [])
+
+  useEffect(() => {
+    const flush = () => writeDraftToStorage(draftRef.current)
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flush()
+    }
+    window.addEventListener('pagehide', flush)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('pagehide', flush)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [])
 
   useEffect(() => {
     const preventScroll = (e: Event) => {
@@ -105,6 +203,10 @@ export function WaitlistHero() {
               placeholder="Full name*"
               required
               autoComplete="name"
+              value={draft.name}
+              onChange={(e) =>
+                persistDraft({ ...draft, name: e.target.value })
+              }
             />
             <label htmlFor="waitlist-phone" className="sr-only">
               Phone number
@@ -117,6 +219,10 @@ export function WaitlistHero() {
               placeholder="Phone number*"
               required
               autoComplete="tel"
+              value={draft.phone}
+              onChange={(e) =>
+                persistDraft({ ...draft, phone: e.target.value })
+              }
             />
             <label htmlFor="waitlist-email" className="sr-only">
               Email
@@ -129,15 +235,34 @@ export function WaitlistHero() {
               placeholder="Email*"
               required
               autoComplete="email"
+              value={draft.email}
+              onChange={(e) =>
+                persistDraft({ ...draft, email: e.target.value })
+              }
             />
-            <button type="submit" className={styles.submit}>
-              <span className={styles.submitLabel}>RESERVE MY PLACE</span>
+            <button
+              type="submit"
+              className={styles.submit}
+              disabled={status === 'loading'}
+            >
+              <span className={styles.submitLabel}>
+                {status === 'loading' ? 'SENDING…' : 'RESERVE MY PLACE'}
+              </span>
               <span className={styles.submitBlobs} aria-hidden>
                 <span className={styles.submitBlob} />
                 <span className={styles.submitBlob} />
                 <span className={styles.submitBlob} />
               </span>
             </button>
+            <p
+              className={`${styles.formStatus} ${
+                status === 'success' ? styles.formStatusSuccess : ''
+              } ${status === 'error' ? styles.formStatusError : ''}`}
+              role="status"
+              aria-live="polite"
+            >
+              {statusMessage}
+            </p>
           </form>
 
           <div className={styles.footer}>
