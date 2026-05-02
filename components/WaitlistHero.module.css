@@ -110,6 +110,144 @@
   gap: 0.75rem;
 }
 
+.phoneRow {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: stretch;
+}
+
+.countryCombo {
+  position: relative;
+  flex: 0 0 clamp(7.5rem, 26%, 9.75rem);
+  min-width: 0;
+  align-self: stretch;
+}
+
+.countryTrigger {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  height: 100%;
+  min-height: 2.85rem;
+  padding: 0 0.4rem 0 0.55rem;
+  border: none;
+  border-radius: 2px;
+  background: #fff;
+  color: #1a1a1a;
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.countryTrigger:focus {
+  outline: 2px solid rgba(0, 0, 0, 0.35);
+  outline-offset: 0;
+}
+
+.countryFlag {
+  font-size: 1.05rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.countryTriggerText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.countryChevron {
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  opacity: 0.65;
+  margin-left: 0.1rem;
+}
+
+.countryPopover {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 4px);
+  left: 0;
+  width: min(18rem, 85vw);
+  max-height: 15rem;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.countrySearch {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+  color: #1a1a1a;
+}
+
+.countrySearch:focus {
+  outline: none;
+}
+
+.countryList {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  overflow-y: auto;
+  max-height: 11.5rem;
+}
+
+.countryEmpty {
+  padding: 0.65rem 0.75rem;
+  margin: 0;
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.countryOption {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  border: none;
+  background: transparent;
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: left;
+  color: #1a1a1a;
+  cursor: pointer;
+}
+
+.countryOption:hover,
+.countryOption:focus {
+  background: #f2f2f2;
+  outline: none;
+}
+
+.phoneField {
+  flex: 1 1 72%;
+  min-width: 0;
+}
+
+.phoneField .input,
+.phoneField .phoneInput {
+  width: 100%;
+}
+
+.phoneInput {
+  font-size: 1.05rem;
+  padding: 1rem 1.1rem;
+}
+
 .formStatus {
   font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
   font-size: 0.875rem;

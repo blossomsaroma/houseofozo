@@ -1,6 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  DEFAULT_WAITLIST_COUNTRY_ISO,
+  type WaitlistCountryOption,
+  WAITLIST_COUNTRY_OPTIONS,
+  flagForIso,
+  isValidWaitlistCountryIso,
+} from '@/lib/waitlistCountryCodes'
 import styles from './WaitlistHero.module.css'
 
 const INSTAGRAM_URL =
@@ -10,11 +17,17 @@ const WAITLIST_DRAFT_KEY = 'houseofozo:waitlist-draft'
 
 type WaitlistDraft = {
   name: string
+  countryIso: string
   phone: string
   email: string
 }
 
-const emptyDraft: WaitlistDraft = { name: '', phone: '', email: '' }
+const emptyDraft: WaitlistDraft = {
+  name: '',
+  countryIso: DEFAULT_WAITLIST_COUNTRY_ISO,
+  phone: '',
+  email: '',
+}
 
 function readDraftFromStorage(): WaitlistDraft {
   if (typeof window === 'undefined') return emptyDraft
@@ -22,14 +35,41 @@ function readDraftFromStorage(): WaitlistDraft {
     const raw = localStorage.getItem(WAITLIST_DRAFT_KEY)
     if (!raw) return emptyDraft
     const p = JSON.parse(raw) as Record<string, unknown>
+    const iso =
+      typeof p.countryIso === 'string' ? p.countryIso.trim().toLowerCase() : ''
+    if (iso && isValidWaitlistCountryIso(iso)) {
+      return {
+        name: typeof p.name === 'string' ? p.name : '',
+        countryIso: iso,
+        phone: typeof p.phone === 'string' ? p.phone : '',
+        email: typeof p.email === 'string' ? p.email : '',
+      }
+    }
+    const legacyDial =
+      typeof p.countryCode === 'string' ? p.countryCode.trim() : ''
+    const fromDial = legacyDial.startsWith('+')
+      ? WAITLIST_COUNTRY_OPTIONS.find((o) => o.dial === legacyDial)?.iso2
+      : undefined
     return {
       name: typeof p.name === 'string' ? p.name : '',
+      countryIso: fromDial ?? DEFAULT_WAITLIST_COUNTRY_ISO,
       phone: typeof p.phone === 'string' ? p.phone : '',
       email: typeof p.email === 'string' ? p.email : '',
     }
   } catch {
     return emptyDraft
   }
+}
+
+function countryMatchesQuery(c: WaitlistCountryOption, q: string): boolean {
+  const s = q.trim().toLowerCase()
+  if (!s) return true
+  if (c.label.toLowerCase().includes(s)) return true
+  if (c.iso2.includes(s)) return true
+  if (c.dial.toLowerCase().includes(s)) return true
+  const qDigits = s.replace(/\D/g, '')
+  if (qDigits && c.dial.replace(/\D/g, '').includes(qDigits)) return true
+  return false
 }
 
 function writeDraftToStorage(draft: WaitlistDraft) {
@@ -66,6 +106,19 @@ export function WaitlistHero() {
     'idle' | 'loading' | 'success' | 'error'
   >('idle')
   const [statusMessage, setStatusMessage] = useState('')
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false)
+  const [countrySearch, setCountrySearch] = useState('')
+  const countryComboRef = useRef<HTMLDivElement>(null)
+  const countrySearchRef = useRef<HTMLInputElement>(null)
+
+  const filteredCountryOptions = useMemo(
+    () => WAITLIST_COUNTRY_OPTIONS.filter((c) => countryMatchesQuery(c, countrySearch)),
+    [countrySearch],
+  )
+
+  const selectedCountry =
+    WAITLIST_COUNTRY_OPTIONS.find((o) => o.iso2 === draft.countryIso) ??
+    WAITLIST_COUNTRY_OPTIONS[0]
 
   const persistDraft = (next: WaitlistDraft) => {
     setDraft(next)
@@ -75,6 +128,7 @@ export function WaitlistHero() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const name = draft.name.trim()
+    const countryIso = draft.countryIso.trim().toLowerCase()
     const phone = draft.phone.trim()
     const email = draft.email.trim()
 
@@ -85,7 +139,7 @@ export function WaitlistHero() {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, email }),
+        body: JSON.stringify({ name, countryIso, phone, email }),
       })
       const data = (await res.json().catch(() => ({}))) as {
         error?: string
@@ -109,6 +163,24 @@ export function WaitlistHero() {
   useEffect(() => {
     setDraft(readDraftFromStorage())
   }, [])
+
+  useEffect(() => {
+    if (!countryPickerOpen) return
+    countrySearchRef.current?.focus()
+  }, [countryPickerOpen])
+
+  useEffect(() => {
+    if (!countryPickerOpen) return
+    const onPointerDown = (e: PointerEvent) => {
+      const el = countryComboRef.current
+      if (el && !el.contains(e.target as Node)) {
+        setCountryPickerOpen(false)
+        setCountrySearch('')
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [countryPickerOpen])
 
   useEffect(() => {
     const flush = () => writeDraftToStorage(draftRef.current)
@@ -208,22 +280,105 @@ export function WaitlistHero() {
                 persistDraft({ ...draft, name: e.target.value })
               }
             />
-            <label htmlFor="waitlist-phone" className="sr-only">
-              Phone number
-            </label>
-            <input
-              id="waitlist-phone"
-              className={styles.input}
-              name="phone"
-              type="tel"
-              placeholder="Phone number*"
-              required
-              autoComplete="tel"
-              value={draft.phone}
-              onChange={(e) =>
-                persistDraft({ ...draft, phone: e.target.value })
-              }
-            />
+            <div className={styles.phoneRow}>
+              <input type="hidden" name="countryIso" value={draft.countryIso} readOnly />
+              <div className={styles.countryCombo} ref={countryComboRef}>
+                <label id="waitlist-country-label" className="sr-only">
+                  Country code — search or choose
+                </label>
+                <button
+                  type="button"
+                  id="waitlist-country-trigger"
+                  className={styles.countryTrigger}
+                  aria-labelledby="waitlist-country-label"
+                  aria-expanded={countryPickerOpen}
+                  aria-haspopup="listbox"
+                  onClick={() => {
+                    setCountryPickerOpen((o) => {
+                      if (!o) setCountrySearch('')
+                      return !o
+                    })
+                  }}
+                >
+                  <span className={styles.countryFlag} aria-hidden>
+                    {flagForIso(draft.countryIso)}
+                  </span>
+                  <span className={styles.countryTriggerText}>
+                    {selectedCountry.dial} · {selectedCountry.label}
+                  </span>
+                  <span className={styles.countryChevron} aria-hidden>
+                    ▾
+                  </span>
+                </button>
+                {countryPickerOpen ? (
+                  <div
+                    className={styles.countryPopover}
+                    role="presentation"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        setCountryPickerOpen(false)
+                        setCountrySearch('')
+                      }
+                    }}
+                  >
+                    <input
+                      ref={countrySearchRef}
+                      type="search"
+                      className={styles.countrySearch}
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      placeholder="Search country or +code"
+                      aria-label="Search countries"
+                      autoComplete="off"
+                    />
+                    <ul className={styles.countryList} role="listbox">
+                      {filteredCountryOptions.length === 0 ? (
+                        <li className={styles.countryEmpty} role="presentation">
+                          No matches
+                        </li>
+                      ) : (
+                        filteredCountryOptions.map((c) => (
+                          <li key={c.iso2} role="none">
+                            <button
+                              type="button"
+                              role="option"
+                              aria-selected={c.iso2 === draft.countryIso}
+                              className={styles.countryOption}
+                              onClick={() => {
+                                persistDraft({ ...draft, countryIso: c.iso2 })
+                                setCountryPickerOpen(false)
+                                setCountrySearch('')
+                              }}
+                            >
+                              {c.dial} · {c.label}
+                            </button>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+              <div className={styles.phoneField}>
+                <label htmlFor="waitlist-phone" className="sr-only">
+                  Phone number (without country code)
+                </label>
+                <input
+                  id="waitlist-phone"
+                  className={`${styles.input} ${styles.phoneInput}`}
+                  name="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="Phone number*"
+                  required
+                  autoComplete="tel-national"
+                  value={draft.phone}
+                  onChange={(e) =>
+                    persistDraft({ ...draft, phone: e.target.value })
+                  }
+                />
+              </div>
+            </div>
             <label htmlFor="waitlist-email" className="sr-only">
               Email
             </label>

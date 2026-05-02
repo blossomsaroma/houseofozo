@@ -1,6 +1,10 @@
 import { google } from 'googleapis'
 import { NextResponse } from 'next/server'
 import { loadServiceAccountCredentials } from '@/lib/googleServiceAccount'
+import {
+  dialForIso,
+  isValidWaitlistCountryIso,
+} from '@/lib/waitlistCountryCodes'
 
 export const runtime = 'nodejs'
 
@@ -25,7 +29,7 @@ function formatSubmittedAt(d: Date): string {
 
 export async function POST(request: Request) {
   const sheetId = process.env.GOOGLE_SHEET_ID
-  const range = process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:D'
+  const range = process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:E'
   if (!sheetId) {
     return NextResponse.json(
       { error: 'Server misconfiguration' },
@@ -44,13 +48,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  const { name: rawName, phone: rawPhone, email: rawEmail } = body as Record<
-    string,
-    unknown
-  >
+  const { name: rawName, countryIso: rawIso, phone: rawPhone, email: rawEmail } =
+    body as Record<string, unknown>
 
   const name =
     typeof rawName === 'string' ? rawName.trim().slice(0, 200) : ''
+  const countryIsoRaw =
+    typeof rawIso === 'string' ? rawIso.trim().toLowerCase() : ''
   const phone =
     typeof rawPhone === 'string' ? rawPhone.trim().slice(0, 40) : ''
   const email =
@@ -58,6 +62,13 @@ export async function POST(request: Request) {
 
   if (!name || !phone || !email) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  }
+  if (!countryIsoRaw || !isValidWaitlistCountryIso(countryIsoRaw)) {
+    return NextResponse.json({ error: 'Invalid country' }, { status: 400 })
+  }
+  const countryCode = dialForIso(countryIsoRaw)
+  if (!countryCode) {
+    return NextResponse.json({ error: 'Invalid country' }, { status: 400 })
   }
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
@@ -89,7 +100,7 @@ export async function POST(request: Request) {
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       requestBody: {
-        values: [[name, phone, email, submittedAt]],
+        values: [[name, countryCode, phone, email, submittedAt]],
       },
     })
   } catch (err) {
