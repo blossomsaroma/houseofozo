@@ -1,0 +1,235 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  padding-top: 2.75rem;
+  background: #910048;
+  animation: overlayIn 0.35s ease-out;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.close:hover {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.column {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: innerIn 0.4s ease-out 0.05s both;
+}
+
+@keyframes innerIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.title {
+  font-family: var(--font-teko), 'Teko', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.85rem, 6.5vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  white-space: nowrap;
+}
+
+.tagline {
+  font-family: var(--font-teko), 'Teko', system-ui, sans-serif;
+  font-size: clamp(1.15rem, 3.8vw, 1.45rem);
+  font-weight: 400;
+  text-align: center;
+  color: #fff;
+  margin: 0 0 1.75rem;
+  line-height: 1.35;
+}
+
+.hindi {
+  font-family: var(--font-devanagari), 'Noto Sans Devanagari', sans-serif;
+  font-weight: 400;
+}
+
+.inner {
+  width: 100%;
+  padding: 2rem 1.75rem 2rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+}
+
+.introLead {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+  color: #fff;
+  margin: 0 0 0.35rem;
+}
+
+.introFollow {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  color: #fff;
+  margin: 0 0 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.95rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 2px;
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.input::placeholder {
+  color: #8a8a8a;
+}
+
+.input:focus {
+  outline: 2px solid rgba(0, 0, 0, 0.35);
+  outline-offset: 0;
+}
+
+.submit {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 0.35rem;
+  padding: 1rem 1.25rem;
+  border: none;
+  cursor: pointer;
+  background: #000;
+  color: #fff;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.submit:hover {
+  opacity: 0.92;
+}
+
+.submit:active {
+  transform: scale(0.99);
+}
+
+.submit:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.innerCircle {
+  display: block;
+  margin-top: 1.35rem;
+  text-align: center;
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.innerCircle:hover {
+  opacity: 0.9;
+}
+
+.footer {
+  margin-top: 1.35rem;
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.65;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.footerEm {
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .inner {
+    padding: 1.65rem 1.2rem 1.5rem;
+  }
+
+  .close {
+    top: 0.65rem;
+    right: 0.65rem;
+  }
+
+  .title {
+    margin-bottom: 0.4rem;
+    font-size: clamp(1.45rem, 5.4vw, 2.75rem);
+    letter-spacing: 0.04em;
+  }
+
+  .tagline {
+    margin-bottom: 1.35rem;
+  }
+}

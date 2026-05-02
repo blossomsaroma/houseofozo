@@ -93,6 +93,36 @@
   text-transform: uppercase;
   color: #000000;
   animation: comingSoonFade 3s ease-in-out infinite;
+  margin-bottom: 1.25rem;
+}
+
+.waitlistButton {
+  font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
+  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0.85rem 1.75rem;
+  cursor: pointer;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+  text-shadow: none;
+}
+
+.waitlistButton:hover {
+  background: rgba(145, 0, 72, 0.85);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.waitlistButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.waitlistButton:active {
+  transform: scale(0.98);
 }
 
 /* Animations */
