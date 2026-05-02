@@ -1,72 +1,17 @@
 'use client'
 
-import { useEffect, useId, useRef } from 'react'
-import styles from './WaitlistModal.module.css'
+import styles from './WaitlistHero.module.css'
 
-type WaitlistModalProps = {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
-  const titleId = useId()
-  const closeRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!isOpen) {
-      document.body.classList.remove('modal-open')
-      return
-    }
-    document.body.classList.add('modal-open')
-    const t = window.setTimeout(() => closeRef.current?.focus(), 0)
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      window.clearTimeout(t)
-      document.body.classList.remove('modal-open')
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [isOpen, onClose])
-
-  if (!isOpen) return null
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose()
-  }
-
+export function WaitlistHero() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     e.currentTarget.reset()
   }
 
   return (
-    <div
-      className={styles.overlay}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      onClick={handleBackdropClick}
-    >
-      <button
-        ref={closeRef}
-        type="button"
-        className={styles.close}
-        onClick={onClose}
-        aria-label="Close waitlist"
-      >
-        ×
-      </button>
-
-      <div
-        className={styles.column}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 id={titleId} className={styles.title}>
-          Join the waitlist
-        </h2>
+    <main className={styles.hero}>
+      <div className={styles.column}>
+        <h1 className={styles.title}>Join the waitlist</h1>
         <p className={styles.tagline}>
           An <span className={styles.hindi}>इंडियन</span> Contemporary Perfumery
         </p>
@@ -129,6 +74,6 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

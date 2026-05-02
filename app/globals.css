@@ -13,12 +13,8 @@ body {
 }
 
 body {
-  background-color: #000;
+  background-color: #910048;
   color: #fff;
-}
-
-body.modal-open {
-  overflow: hidden;
 }
 
 .sr-only {
