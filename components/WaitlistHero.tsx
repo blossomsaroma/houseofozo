@@ -15,6 +15,14 @@ const INSTAGRAM_URL =
 
 const WAITLIST_DRAFT_KEY = 'houseofozo:waitlist-draft'
 
+/**
+ * `next dev`: skip `/api/waitlist` and show the success modal (no Google env needed).
+ * Set NEXT_PUBLIC_USE_REAL_WAITLIST_API=true in .env.local to hit the real API locally.
+ */
+const skipWaitlistApiInDev =
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_USE_REAL_WAITLIST_API !== 'true'
+
 type WaitlistDraft = {
   name: string
   countryIso: string
@@ -102,10 +110,10 @@ export function WaitlistHero() {
   const draftRef = useRef(draft)
   draftRef.current = draft
 
-  const [status, setStatus] = useState<
-    'idle' | 'loading' | 'success' | 'error'
-  >('idle')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
+  const [successModalOpen, setSuccessModalOpen] = useState(false)
+  const successCloseRef = useRef<HTMLButtonElement>(null)
   const [countryPickerOpen, setCountryPickerOpen] = useState(false)
   const [countrySearch, setCountrySearch] = useState('')
   const countryComboRef = useRef<HTMLDivElement>(null)
@@ -132,8 +140,16 @@ export function WaitlistHero() {
     const phone = draft.phone.trim()
     const email = draft.email.trim()
 
-    setStatus('loading')
     setStatusMessage('')
+
+    if (skipWaitlistApiInDev) {
+      persistDraft(emptyDraft)
+      setStatus('idle')
+      setSuccessModalOpen(true)
+      return
+    }
+
+    setStatus('loading')
 
     try {
       const res = await fetch('/api/waitlist', {
@@ -151,9 +167,10 @@ export function WaitlistHero() {
         return
       }
 
-      setStatus('success')
-      setStatusMessage("You're on the list.")
       persistDraft(emptyDraft)
+      setStatus('idle')
+      setStatusMessage('')
+      setSuccessModalOpen(true)
     } catch {
       setStatus('error')
       setStatusMessage('Network error. Try again.')
@@ -194,6 +211,21 @@ export function WaitlistHero() {
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])
+
+  useEffect(() => {
+    if (!successModalOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSuccessModalOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    const id = window.requestAnimationFrame(() => {
+      successCloseRef.current?.focus()
+    })
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.cancelAnimationFrame(id)
+    }
+  }, [successModalOpen])
 
   useEffect(() => {
     const preventScroll = (e: Event) => {
@@ -263,7 +295,11 @@ export function WaitlistHero() {
             get more than just a scent.
           </p>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <form
+            className={styles.form}
+            onSubmit={handleSubmit}
+            suppressHydrationWarning
+          >
             <label htmlFor="waitlist-name" className="sr-only">
               Full name
             </label>
@@ -279,9 +315,16 @@ export function WaitlistHero() {
               onChange={(e) =>
                 persistDraft({ ...draft, name: e.target.value })
               }
+              suppressHydrationWarning
             />
             <div className={styles.phoneRow}>
-              <input type="hidden" name="countryIso" value={draft.countryIso} readOnly />
+              <input
+                type="hidden"
+                name="countryIso"
+                value={draft.countryIso}
+                readOnly
+                suppressHydrationWarning
+              />
               <div className={styles.countryCombo} ref={countryComboRef}>
                 <label id="waitlist-country-label" className="sr-only">
                   Country code — search or choose
@@ -330,6 +373,7 @@ export function WaitlistHero() {
                       placeholder="Search country or +code"
                       aria-label="Search countries"
                       autoComplete="off"
+                      suppressHydrationWarning
                     />
                     <ul className={styles.countryList} role="listbox">
                       {filteredCountryOptions.length === 0 ? (
@@ -376,6 +420,7 @@ export function WaitlistHero() {
                   onChange={(e) =>
                     persistDraft({ ...draft, phone: e.target.value })
                   }
+                  suppressHydrationWarning
                 />
               </div>
             </div>
@@ -394,6 +439,7 @@ export function WaitlistHero() {
               onChange={(e) =>
                 persistDraft({ ...draft, email: e.target.value })
               }
+              suppressHydrationWarning
             />
             <button
               type="submit"
@@ -411,8 +457,8 @@ export function WaitlistHero() {
             </button>
             <p
               className={`${styles.formStatus} ${
-                status === 'success' ? styles.formStatusSuccess : ''
-              } ${status === 'error' ? styles.formStatusError : ''}`}
+                status === 'error' ? styles.formStatusError : ''
+              }`}
               role="status"
               aria-live="polite"
             >
@@ -448,6 +494,39 @@ export function WaitlistHero() {
           support@houseofozo.com
         </a>
       </footer>
+
+      {successModalOpen ? (
+        <div
+          className={styles.successBackdrop}
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSuccessModalOpen(false)
+          }}
+        >
+          <div
+            className={styles.successModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="waitlist-success-title"
+            aria-describedby="waitlist-success-desc"
+          >
+            <h2 id="waitlist-success-title" className={styles.successTitle}>
+              You&apos;re on the list
+            </h2>
+            <p id="waitlist-success-desc" className={styles.successText}>
+              We&apos;ll be in touch when the house opens for early access.
+            </p>
+            <button
+              ref={successCloseRef}
+              type="button"
+              className={styles.successClose}
+              onClick={() => setSuccessModalOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }

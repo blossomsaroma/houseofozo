@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 const { allCountries } = require('country-telephone-data') as {
   allCountries: Array<{ name: string; iso2: string; dialCode: string }>
 }

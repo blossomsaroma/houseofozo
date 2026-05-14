@@ -31,10 +31,11 @@ export async function POST(request: Request) {
   const sheetId = process.env.GOOGLE_SHEET_ID
   const range = process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:E'
   if (!sheetId) {
-    return NextResponse.json(
-      { error: 'Server misconfiguration' },
-      { status: 500 },
-    )
+    const error =
+      process.env.NODE_ENV === 'development'
+        ? 'Missing GOOGLE_SHEET_ID (set it in .env.local)'
+        : 'Server misconfiguration'
+    return NextResponse.json({ error }, { status: 500 })
   }
 
   let body: unknown
@@ -78,10 +79,11 @@ export async function POST(request: Request) {
   try {
     credentials = loadServiceAccountCredentials()
   } catch {
-    return NextResponse.json(
-      { error: 'Server misconfiguration' },
-      { status: 500 },
-    )
+    const error =
+      process.env.NODE_ENV === 'development'
+        ? 'Missing Google credentials (GOOGLE_SERVICE_ACCOUNT_JSON, _BASE64, or service-account.json)'
+        : 'Server misconfiguration'
+    return NextResponse.json({ error }, { status: 500 })
   }
 
   const auth = new google.auth.GoogleAuth({

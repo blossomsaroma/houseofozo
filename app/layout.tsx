@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   title: 'House of Ozo',
   description: 'A gift from memory returns',
   icons: {
-    icon: '/logo.png',
+    icon: '/favicon.ico',
     apple: '/logo.png',
   },
 }
@@ -44,6 +44,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${cormorant.variable} ${teko.variable} ${lato.variable} ${notoDevanagari.variable}`}
+        suppressHydrationWarning
       >
         {children}
       </body>
