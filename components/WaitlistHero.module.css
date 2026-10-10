@@ -282,7 +282,7 @@
 }
 
 .submit {
-  --submit-goo: #940050;
+  --submit-goo:#96332d;
   position: relative;
   width: 100%;
   font-family: var(--font-lato), 'Lato', system-ui, sans-serif;
@@ -511,7 +511,7 @@
 
 .successClose:hover {
   background: #fff;
-  color: #940050;
+  color: #96332d;
 }
 
 .successClose:focus-visible {
