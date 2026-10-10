@@ -21,7 +21,7 @@
   box-sizing: border-box;
   overflow: hidden;
   overscroll-behavior: none;
-  background-color: #000;
+  background-color: #96332d;
 }
 
 .bgVideo {
@@ -416,11 +416,11 @@
 }
 
 .instagramLink:hover {
-  color: #ffd9ea;
+  color: #96332d;
 }
 
 .instagramLink:focus-visible {
-  outline: 2px solid #ffd9ea;
+  outline: 2px solid #96332d;
   outline-offset: 4px;
   border-radius: 4px;
 }
@@ -441,13 +441,13 @@
 }
 
 .supportEmail:hover {
-  color: #ffd9ea;
+  color: #96332d;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .supportEmail:focus-visible {
-  outline: 2px solid #ffd9ea;
+  outline: 2px solid #96332d;
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -515,7 +515,7 @@
 }
 
 .successClose:focus-visible {
-  outline: 2px solid #ffd9ea;
+  outline: 2px solid #96332d;
   outline-offset: 3px;
 }
 
